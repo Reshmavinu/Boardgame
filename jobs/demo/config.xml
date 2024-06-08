@@ -1,0 +1,77 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1400.v7fd111b_ec82f">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2198.v41dd8ef6dd56"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2198.v41dd8ef6dd56">
+      <jobProperties/>
+      <triggers/>
+      <parameters>
+        <string>gitbranch</string>
+      </parameters>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>2</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>gitbranch</name>
+          <description>Select an option:</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>main</string>
+              <string>qa</string>
+              <string>feature</string>
+              <string>dev</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@3894.3896.vca_2c931e7935">
+    <script>pipeline {
+    agent any
+    tools{
+     maven &apos;maven3&apos;
+    }
+    parameters {
+        choice(
+            choices: [&apos;main&apos;, &apos;qa&apos;, &apos;feature&apos;,&apos;dev&apos;],
+            description: &apos;Select an option:&apos;,
+            name: &apos;gitbranch&apos;
+        )
+    }
+    stages {
+        stage(&apos;Git checkout&apos;) {
+            steps {
+                git branch: &quot;${params.gitbranch}&quot;, url: &apos;https://github.com/Reshmavinu/Boardgame.git&apos;
+            }
+        }
+        stage(&apos;test&apos;) {
+            steps {
+                sh &apos;mvn test&apos;
+            }
+        }
+        stage(&apos;build&apos;) {
+            steps {
+                sh &apos;mvn clean package&apos;
+            }
+        }
+    }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
